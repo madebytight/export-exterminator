@@ -1,0 +1,9 @@
+{
+  "name": "Export Exterminator",
+  "id": "1210594916286005748",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": [
+    "figma"
+  ]
+}
