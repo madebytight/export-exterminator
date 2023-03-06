@@ -1,4 +1,35 @@
-let exterminated = 0;
+const message = ({ exterminated }) => {
+  const pickOne = (array) => {
+    return array[Math.floor(Math.random() * array.length)];
+  };
+
+  if (exterminated === 0) {
+    return pickOne([
+      '0 exports removed. You\'re all good',
+      '0 exports removed. No need for the exterminator',
+      '0 exports removed. You got this shit under control!  ',
+    ]);
+  }
+
+  const exportCount = pickOne([
+    count(exterminated, 'pesky exports'),
+    count(exterminated, 'unwanted exports'),
+    count(exterminated, 'exports'),
+  ]);
+
+  return pickOne([
+    `${exportCount} exterminated`,
+    `${exportCount} dealt with`,
+    `${exportCount} dealt with. Hooray!`,
+    `${exportCount} squashed`,
+    `${exportCount} removed. Permanently.`,
+    `${exportCount} blown to smithereens`,
+    `${exportCount} are now sleeping with the fishes`,
+    `${exportCount} won't be heard from again`,
+    `${exportCount} removed. They won't bother you again.`,
+  ]);
+};
+
 const log = (node, ...args) => {
   console.log(`- ${name(node)}:`, ...args);
 };
@@ -32,6 +63,7 @@ const visit = (node, exterminate = false) => {
     const children = Array.isArray(node.children) ? node.children : [];
     const exportSettings = node.exportSettings;
     const isExportable = exportSettings.length > 0;
+    let exterminated = 0;
 
     if (exterminate && isExportable) {
       log(node, `${count(exportSettings.length, 'exports')} exterminated`);
@@ -43,20 +75,22 @@ const visit = (node, exterminate = false) => {
       children.map((child) => {
         return visit(child, exterminate || isExportable);
       })
-    ).then(() => {
-      resolve();
+    ).then((reults) => {
+      resolve({
+        exterminated: reults.reduce((total, { exterminated }) => {
+          return total + exterminated;
+        }, exterminated)
+      });
     });
-
   });
-}
-
+};
 
 console.log('Exterminate exports:');
 
 visit(figma.currentPage)
-  .then(() => {
-    const message = `${count(exterminated, 'pesky exports')} exterminated`;
-    console.log(`- ${message}`);
-    figma.notify(message);
+  .then((result) => {
+    const m = message(result);
+    console.log(`- ${m}`);
+    figma.notify(m);
   })
-  .then(figma.closePlugin);
+  .finally(figma.closePlugin);
